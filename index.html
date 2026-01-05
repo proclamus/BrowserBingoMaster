@@ -3,46 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browser Bingo Master</title>
+    <title>Bingo Master Pro - Preciso</title>
     <style>
         :root { --primary: #2196F3; --secondary: #FF9800; --bg: #f4f7f6; --success: #4CAF50; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; align-items: center; }
-        
         .screen { display: none; width: 100%; max-width: 600px; padding: 20px; box-sizing: border-box; }
         .active { display: block; }
-
-        /* UI Cards */
         .card-ui { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .input-group { margin-bottom: 15px; }
         label { display: block; font-size: 14px; margin-bottom: 5px; color: #555; font-weight: bold; }
         input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        
-        /* Botões */
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
-        button:active { transform: scale(0.98); }
         .btn-blue { background: var(--primary); }
         .btn-orange { background: var(--secondary); }
         .btn-back { background: #666; }
-
-        /* Sorteador */
         .big-number { font-size: 80px; font-weight: bold; color: var(--secondary); text-align: center; margin: 10px 0; line-height: 1; }
         .history { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 15px; background: #eee; padding: 12px; border-radius: 8px; max-height: 120px; overflow-y: auto; border: 1px solid #ddd; }
         .history-item { background: white; padding: 4px 10px; border-radius: 5px; font-size: 13px; border: 1px solid #ccc; font-weight: bold; }
-
-        /* Grid da Cartela */
         .grid { display: grid; gap: 4px; background: #bbb; padding: 4px; border-radius: 4px; margin-top: 10px; }
-        .cell { 
-            background: white; aspect-ratio: 1/1; display: flex; align-items: center; 
-            justify-content: center; font-weight: bold; cursor: pointer; position: relative; 
-            font-size: clamp(10px, 4vw, 16px); text-align: center; overflow: hidden;
-        }
+        .cell { background: white; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; position: relative; font-size: clamp(10px, 4vw, 16px); }
         .cell.marked::after { content: "X"; color: rgba(255,0,0,0.7); position: absolute; font-size: 2em; font-weight: bold; z-index: 3; }
+        
+        /* Casa BINGO (Centro) */
         .cell.free-space { background: #fff3e0; color: #e65100; font-size: 0.7em; cursor: default; }
         
-        /* Riscos de Vitória */
+        /* Casa Bloqueada (Vazia) */
+        .cell.blocked { background: #e0e0e0; cursor: default; opacity: 0.6; }
+        .cell.blocked::before { content: ""; width: 80%; height: 1px; background: #aaa; position: absolute; transform: rotate(45deg); }
+
         .line-h::before { content: ""; position: absolute; width: 100%; height: 4px; background: rgba(76, 175, 80, 0.5); z-index: 2; }
         .line-v::after { content: ""; position: absolute; height: 100%; width: 4px; background: rgba(76, 175, 80, 0.5); z-index: 2; }
-        
         .bingo-win-msg { color: var(--success); text-align: center; font-weight: bold; font-size: 22px; display: none; margin-bottom: 10px; animation: bounce 0.5s infinite alternate; }
         @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
     </style>
@@ -51,36 +41,17 @@
 
     <div id="menu" class="screen active">
         <div class="card-ui">
-            <h2 style="text-align: center; color: var(--primary);">Browser Bingo Master</h2>
-            
-            <div class="input-group">
-                <label>N Máximo (Sorteio de 1 até...)</label>
-                <input type="number" id="maxN" value="75">
-            </div>
-
-            <div class="input-group">
-                <label>Total de Números na Cartela</label>
-                <input type="number" id="totalCells" value="24" placeholder="Ex: 24 para grade 5x5">
-            </div>
-
+            <h2 style="text-align: center; color: var(--primary);">Bingo Master</h2>
+            <div class="input-group"><label>N Máximo (Sorteio)</label><input type="number" id="maxN" value="75"></div>
+            <div class="input-group"><label>Total de Números na Cartela</label><input type="number" id="totalCells" value="13"></div>
             <div class="input-group">
                 <label>Quantidade de Cartelas</label>
-                <select id="cardQty">
-                    <option value="1">1 Cartela</option>
-                    <option value="2">2 Cartelas</option>
-                    <option value="3">3 Cartelas</option>
-                    <option value="4">4 Cartelas</option>
-                </select>
+                <select id="cardQty"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
             </div>
-
             <div class="input-group">
-                <label>Ordenação dos Números</label>
-                <select id="orderMode">
-                    <option value="H">Horizontal (Linha por Linha)</option>
-                    <option value="V">Vertical (Coluna por Coluna)</option>
-                </select>
+                <label>Ordenação</label>
+                <select id="orderMode"><option value="H">Horizontal</option><option value="V">Vertical</option></select>
             </div>
-
             <button class="btn-blue" onclick="initGame()">GERAR CARTELAS</button>
             <button class="btn-orange" onclick="openSorteador()">ABRIR SORTEADOR</button>
         </div>
@@ -88,34 +59,24 @@
 
     <div id="sorteador" class="screen">
         <div class="card-ui">
-            <h3 style="text-align: center; margin-top: 0;">Sorteador Central</h3>
+            <h3 style="text-align: center;">Sorteador</h3>
             <div id="numDisplay" class="big-number">--</div>
-            <div id="statusMsg" style="color:red; text-align:center; font-weight:bold; height: 20px; margin-bottom: 10px;"></div>
-            
-            <button id="drawBtn" class="btn-orange" onclick="drawNext()">SORTEAR PRÓXIMO</button>
-            
-            <p style="margin: 15px 0 5px 0; font-size: 14px; color: #666;">Histórico (Ordem Crescente):</p>
+            <div id="statusMsg" style="color:red; text-align:center; font-weight:bold;"></div>
+            <button id="drawBtn" class="btn-orange" onclick="drawNext()">SORTEAR</button>
             <div id="historyBox" class="history"></div>
-            
-            <button class="btn-back" onclick="goTo('menu')">VOLTAR AO MENU</button>
+            <button class="btn-back" onclick="goTo('menu')">VOLTAR</button>
         </div>
     </div>
 
     <div id="game" class="screen">
         <div id="cardsArea"></div>
-        <button class="btn-back" onclick="goTo('menu')">SAIR DO JOGO</button>
+        <button class="btn-back" onclick="goTo('menu')">SAIR</button>
     </div>
 
     <script>
-        let pool = [];
-        let drawnNumbers = [];
+        let pool = [], drawnNumbers = [];
+        function goTo(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 
-        function goTo(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        // LÓGICA DO SORTEADOR
         function openSorteador() {
             const n = parseInt(document.getElementById('maxN').value) || 75;
             pool = Array.from({length: n}, (_, i) => i + 1);
@@ -129,104 +90,117 @@
 
         function drawNext() {
             if (pool.length === 0) return;
-            
             const idx = Math.floor(Math.random() * pool.length);
             const num = pool.splice(idx, 1)[0];
             drawnNumbers.push(num);
-            
             document.getElementById('numDisplay').innerText = num;
-            
-            // Atualizar histórico ordenado
             const sorted = [...drawnNumbers].sort((a,b) => a - b);
             document.getElementById('historyBox').innerHTML = sorted.map(n => `<span class="history-item">${n}</span>`).join('');
-
-            if (pool.length === 0) {
-                document.getElementById('statusMsg').innerText = "Fim de jogo (Não há mais números)";
-                document.getElementById('drawBtn').disabled = true;
-            }
+            if (pool.length === 0) { document.getElementById('statusMsg').innerText = "Fim!"; document.getElementById('drawBtn').disabled = true; }
         }
 
-        // LÓGICA DAS CARTELAS
         function initGame() {
             const totalRequested = parseInt(document.getElementById('totalCells').value) || 24;
             const nMax = parseInt(document.getElementById('maxN').value) || 75;
             const qty = parseInt(document.getElementById('cardQty').value);
             const mode = document.getElementById('orderMode').value;
             
-            // Define o tamanho da grade quadrada (ex: 24 -> 5x5)
             let size = Math.ceil(Math.sqrt(totalRequested));
-            if (size % 2 === 0 && totalRequested > (size * size)) size++; // ajuste simples
+            // Caso especial: se for um número ímpar central (ex 24), a grade vira 5x5 mas o cálculo de números considera a casa livre
+            let isOddGrid = size % 2 !== 0;
+            let middleIdx = isOddGrid ? Math.floor((size * size) / 2) : -1;
             
-            const hasFreeSpace = (size % 2 !== 0); 
-            const middleIdx = Math.floor((size * size) / 2);
-            const numbersNeeded = hasFreeSpace ? (size * size) - 1 : (size * size);
+            // Quantas casas a grade total tem
+            let gridTotalCapacity = size * size;
+            // Descontando a casa BINGO se houver
+            let usableCapacity = isOddGrid ? gridTotalCapacity - 1 : gridTotalCapacity;
 
-            if (nMax < numbersNeeded) {
-                alert("Erro: O 'N Máximo' deve ser maior ou igual ao total de números da cartela (" + numbersNeeded + ").");
-                return;
+            if (totalRequested > usableCapacity) {
+                size++;
+                gridTotalCapacity = size * size;
+                isOddGrid = size % 2 !== 0;
+                middleIdx = isOddGrid ? Math.floor((size * size) / 2) : -1;
             }
 
             const area = document.getElementById('cardsArea');
             area.innerHTML = "";
-
             for (let i = 0; i < qty; i++) {
-                area.appendChild(createBingoCard(nMax, size, mode, hasFreeSpace, middleIdx));
+                area.appendChild(createBingoCard(nMax, size, mode, totalRequested, middleIdx));
             }
             goTo('game');
         }
 
-        function createBingoCard(nMax, size, mode, hasFreeSpace, middleIdx) {
+        function createBingoCard(nMax, size, mode, totalRequested, middleIdx) {
             const cardContainer = document.createElement('div');
             cardContainer.className = 'card-ui';
-            
             const winMsg = document.createElement('div');
-            winMsg.className = 'bingo-win-msg';
-            winMsg.innerText = "🎉 BINGO! 🎉";
-
+            winMsg.className = 'bingo-win-msg'; winMsg.innerText = "🎉 BINGO! 🎉";
             const grid = document.createElement('div');
             grid.className = 'grid';
             grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
-            // Gerar números únicos
+            // 1. Decidir quais índices serão BLOQUEADOS
+            let gridIndices = Array.from({length: size * size}, (_, i) => i);
+            let blockedIndices = [];
+            
+            // Se houver casa BINGO, ela não conta como bloqueada nem como número
+            let availableForNumbers = [...gridIndices];
+            if (middleIdx !== -1) availableForNumbers = availableForNumbers.filter(i => i !== middleIdx);
+
+            let excess = availableForNumbers.length - totalRequested;
+            
+            // Lógica de remoção: Alterna Topo-Esquerda (0) e Baixo-Direita (fim)
+            let useStart = true;
+            for(let i=0; i<excess; i++) {
+                let targetIdx;
+                if(useStart) {
+                    targetIdx = availableForNumbers.shift(); // Tira do início
+                } else {
+                    targetIdx = availableForNumbers.pop(); // Tira do fim
+                }
+                blockedIndices.push(targetIdx);
+                useStart = !useStart;
+            }
+
+            // 2. Gerar números para as casas que sobraram
             let nums = [];
-            while(nums.length < (hasFreeSpace ? (size*size)-1 : size*size)) {
+            while(nums.length < totalRequested) {
                 let r = Math.floor(Math.random() * nMax) + 1;
                 if(!nums.includes(r)) nums.push(r);
             }
             nums.sort((a,b) => a - b);
 
-            // Mapear números para as células
-            let cellsData = [];
-            let nPointer = 0;
+            // 3. Montar estrutura final das células
+            let finalCells = new Array(size * size);
+            // Marcar BINGO
+            if (middleIdx !== -1) finalCells[middleIdx] = { type: 'free', val: 'BINGO' };
+            // Marcar Bloqueadas
+            blockedIndices.forEach(idx => finalCells[idx] = { type: 'blocked', val: '' });
             
-            // Pre-preencher estrutura
-            for(let i=0; i < size*size; i++) {
-                if(hasFreeSpace && i === middleIdx) {
-                    cellsData.push({ type: 'free', val: 'BINGO' });
-                } else {
-                    cellsData.push({ type: 'num', val: 0 });
-                }
-            }
-
-            // Distribuir números conforme ordenação
+            // Preencher o resto com 'num'
+            let nPointer = 0;
             if(mode === 'H') {
-                cellsData.forEach(c => { if(c.type === 'num') c.val = nums[nPointer++]; });
+                for(let i=0; i<finalCells.length; i++) {
+                    if(!finalCells[i]) finalCells[i] = { type: 'num', val: nums[nPointer++] };
+                }
             } else {
                 for(let col=0; col<size; col++) {
                     for(let row=0; row<size; row++) {
                         let idx = row * size + col;
-                        if(cellsData[idx].type === 'num') cellsData[idx].val = nums[nPointer++];
+                        if(!finalCells[idx]) finalCells[idx] = { type: 'num', val: nums[nPointer++] };
                     }
                 }
             }
 
-            // Criar elementos HTML
-            cellsData.forEach((data, index) => {
+            // 4. Renderizar
+            finalCells.forEach((data, index) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
                 if(data.type === 'free') {
                     cell.classList.add('free-space', 'marked');
                     cell.innerHTML = "⭐<br>BINGO";
+                } else if(data.type === 'blocked') {
+                    cell.classList.add('blocked');
                 } else {
                     cell.innerText = data.val;
                     cell.onclick = () => {
@@ -245,8 +219,9 @@
         function checkWin(grid, size, winMsg) {
             const cells = grid.querySelectorAll('.cell');
             cells.forEach(c => { c.classList.remove('line-h'); c.classList.remove('line-v'); });
-
-            let totalMarked = 0;
+            
+            let totalToMark = 0;
+            let markedCount = 0;
 
             for (let i = 0; i < size; i++) {
                 let row = [], col = [];
@@ -254,17 +229,30 @@
                     row.push(i * size + j);
                     col.push(j * size + i);
                 }
-
-                if (row.every(idx => cells[idx].classList.contains('marked'))) {
-                    row.forEach(idx => cells[idx].classList.add('line-h'));
-                }
-                if (col.every(idx => cells[idx].classList.contains('marked'))) {
-                    col.forEach(idx => cells[idx].classList.add('line-v'));
-                }
+                // Só valida linha se todos os números clicáveis nela estiverem marcados
+                // Casas BLOQUEADAS são ignoradas na checagem de linha completa
+                if (checkLine(row, cells)) row.forEach(idx => cells[idx].classList.add('line-h'));
+                if (checkLine(col, cells)) col.forEach(idx => cells[idx].classList.add('line-v'));
             }
 
-            cells.forEach(c => { if(c.classList.contains('marked')) totalMarked++; });
-            winMsg.style.display = (totalMarked === size * size) ? 'block' : 'none';
+            cells.forEach(c => {
+                if(!c.classList.contains('blocked')) {
+                    totalToMark++;
+                    if(c.classList.contains('marked')) markedCount++;
+                }
+            });
+            winMsg.style.display = (markedCount === totalToMark) ? 'block' : 'none';
+        }
+
+        function checkLine(indices, cells) {
+            // Uma linha/coluna só conta se tiver pelo menos uma casa útil (não bloqueada)
+            let hasActiveCell = indices.some(idx => !cells[idx].classList.contains('blocked'));
+            if (!hasActiveCell) return false;
+
+            return indices.every(idx => {
+                let c = cells[idx];
+                return c.classList.contains('blocked') || c.classList.contains('marked');
+            });
         }
     </script>
 </body>
